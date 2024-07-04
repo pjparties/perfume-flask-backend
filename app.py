@@ -3,7 +3,7 @@ from pprint import pprint
 import os
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_cors import CORS  # Add this line
 
 load_dotenv()
 
@@ -11,8 +11,10 @@ filepath = os.path.abspath(os.path.dirname(__file__)) + "/data/perfumes.db"
 # print(filepath)
 
 flask_app = Flask(__name__)
+CORS(flask_app, resources={r"/api/*": {"origins": "*"}})
+
 flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+filepath
-# print(flask_app.config['SQLALCHEMY_DATABASE_URI'])
+
 flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(flask_app)
 
@@ -21,6 +23,8 @@ db = SQLAlchemy(flask_app)
 # \"sillage\" REAL,\n  \"reviews\" INTEGER,\n  \"recommended_perfumes\" TEXT\n)"
 
 # Perfume model
+
+
 class Perfumes(db.Model):
     key = db.Column(db.Integer, primary_key=True)
     brand = db.Column(db.String(100))
@@ -92,7 +96,8 @@ def get_recommendations_by_key():
     if not request.args.get("key"):
         return make_response("Please enter a key", 400)
     key = int(request.args.get("key"))
-    no_of_recs = int(request.args.get("no_of_recs")) if request.args.get("no_of_recs") else 6
+    no_of_recs = int(request.args.get("no_of_recs")
+                     ) if request.args.get("no_of_recs") else 6
     if no_of_recs > 40 or no_of_recs < 1:
         return make_response("Please enter a number between 1 and 40", 400)
     perfume_obj = Perfumes.query.filter_by(key=key).first()
