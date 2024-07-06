@@ -9,4 +9,6 @@ COPY . .
 
 EXPOSE 5000
 
+COPY run_flask.sh .
+
 CMD ["flask", "run", "--host=0.0.0.0"]

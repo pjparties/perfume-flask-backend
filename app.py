@@ -127,4 +127,4 @@ def get_recommendations_by_key():
 
 
 if __name__ == "__main__":
-    flask_app.run(port=5000)
+    flask_app.run(host="0.0.0.0", port=5000)
