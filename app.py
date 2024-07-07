@@ -3,8 +3,7 @@ from pprint import pprint
 import os
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS  # Add this line
-from waitress import serve
+from flask_cors import CORS
 
 load_dotenv()
 
@@ -130,4 +129,4 @@ def get_recommendations_by_key():
 
 if __name__ == "__main__":
     print("Starting Server...")
-    serve(app, host="0.0.0.0", port=(os.getenv("PORT") or 5000))
+    app.run()
