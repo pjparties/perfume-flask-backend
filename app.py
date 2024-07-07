@@ -4,19 +4,21 @@ import os
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS  # Add this line
+from waitress import serve
 
 load_dotenv()
 
 filepath = os.path.abspath(os.path.dirname(__file__)) + "/data/perfumes.db"
 # print(filepath)
 
-flask_app = Flask(__name__)
-CORS(flask_app, resources={r"/api/*": {"origins": "*"}})
+app = Flask(__name__)
+frontend_url = os.getenv("FRONTEND_URL", "https://default-frontend-url.com")
+CORS(app, resources={r"/api/*": {"origins": frontend_url}})
 
-flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+filepath
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+filepath
 
-flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(flask_app)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 # "CREATE TABLE \"perfumes\" (\n\"key\" INTEGER,\n  \"brand\" TEXT,\n  \"perfume\" TEXT,\n
 # \"image_url\" TEXT,\n  \"main_accords\" TEXT,\n  \"notes\" TEXT,\n  \"longevity\" REAL,\n
@@ -41,12 +43,12 @@ class Perfumes(db.Model):
         return f"<Perfume key={self.key}, brand={self.brand}, perfume={self.perfume}>"
 
 
-@flask_app.route("/api", methods=["GET"])
+@app.route("/api", methods=["GET"])
 def home():
     return make_response("Welcome to the perfume recommendation API", 200)
 
 
-@flask_app.route("/api/get_all_perfumes", methods=["GET"])
+@app.route("/api/get_all_perfumes", methods=["GET"])
 def get_all_perfumes():
     perfume_object = Perfumes.query.all()
     all_perfumes = []
@@ -68,7 +70,7 @@ def get_all_perfumes():
     return make_response(jsonify(all_perfumes), 200)
 
 
-@flask_app.route("/api/get_perfume_by_key", methods=["GET"])
+@app.route("/api/get_perfume_by_key", methods=["GET"])
 def get_perfume_by_key():
     if not request.args.get("key"):
         return make_response("Please enter a key", 400)
@@ -91,7 +93,7 @@ def get_perfume_by_key():
     return make_response(jsonify(perfume), 200)
 
 
-@flask_app.route("/api/get_recommendations_by_key", methods=["GET"])
+@app.route("/api/get_recommendations_by_key", methods=["GET"])
 def get_recommendations_by_key():
     if not request.args.get("key"):
         return make_response("Please enter a key", 400)
@@ -127,4 +129,5 @@ def get_recommendations_by_key():
 
 
 if __name__ == "__main__":
-    flask_app.run(host="0.0.0.0", port=5000)
+    print("Starting Server...")
+    serve(app, host="0.0.0.0", port=(os.getenv("PORT") or 5000))
