@@ -13,7 +13,7 @@ filepath = os.path.abspath(os.path.dirname(__file__)) + "/data/perfumes.db"
 
 app = Flask(__name__)
 frontend_url = os.getenv("FRONTEND_URL", "https://default-frontend-url.com")
-CORS(app, resources={r"/api/*": {"origins": frontend_url}})
+CORS(app, resources={r"/api/*": {"origins": '*'}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+filepath
 
